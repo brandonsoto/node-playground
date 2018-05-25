@@ -1,39 +1,28 @@
-var mongoose = require('mongoose');
+var express = require('express');
+var bodyparser = require('body-parser');
 
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
 
-var TodoModel = mongoose.model('Todo', {
-    text: {
-        type: String,
-        required: true,
-        minLength: 1,
-        trim: true
-    },
-    completed: {
-        type: Boolean,
-        default: false
-    },
-    completedAt: {
-        type: Number,
-        default: null
-    }
+var app = express();
+app.use(bodyparser.json());
+
+app.post('/todos', (req, res) => {
+    console.log(req.body);
+
+    var todo = new Todo({text: req.body.text});
+
+    todo.save().then((doc) => {
+        res.send(doc);
+    }, (err) => {
+        res.status(400).send(err);
+    });
 });
 
-var UserModel = mongoose.model('User', {
-    email: {
-        type: String,
-        required: true,
-        minLength: 1,
-        trim: true
-    }
+app.get('/todos', (req, res) => {
 });
 
-
-var newTodo = new TodoModel({text: "Feed the cat"});
-var newUser = new UserModel({email: "b@g"});
-//newTodo.save().then(
-//    (doc) => { console.log("Saved successfully!"); console.log(doc); },
-//    (err) => { console.log(err); }
-//);
-
+app.listen(3000, () => {
+    console.log("Server is listening");
+});
